@@ -5,8 +5,8 @@ import Papa from 'papaparse';
 
 export async function GET(request: NextRequest) {
   try {
-    // Path to the CSV file in the src/data directory
-    const csvFilePath = path.join(process.cwd(), 'src', 'data', 'hr-data.csv');
+    // Path to the CSV file in the public/data directory
+    const csvFilePath = path.join(process.cwd(), 'public', 'data', 'hr-data.csv');
     
     // Check if file exists
     if (!fs.existsSync(csvFilePath)) {
