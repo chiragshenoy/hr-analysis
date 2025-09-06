@@ -27,17 +27,20 @@ export default function ExitTrendsChart({ employees }: ExitTrendsChartProps) {
     .reduce((acc, employee) => {
       const exitDate = new Date(employee['Date of Exit']);
       const year = exitDate.getFullYear();
-      const exitType = employee['Exit Type'] || 'Unknown';
+      const exitType = employee['Exit Type'];
       
-      if (!acc[year]) {
-        acc[year] = { year: year.toString(), Voluntary: 0, Involuntary: 0, Unknown: 0, total: 0 };
+      // Only process exits with known types
+      if (exitType === 'Voluntary' || exitType === 'Involuntary') {
+        if (!acc[year]) {
+          acc[year] = { year: year.toString(), Voluntary: 0, Involuntary: 0, total: 0 };
+        }
+        
+        acc[year][exitType as keyof typeof acc[typeof year]]++;
+        acc[year].total++;
       }
       
-      acc[year][exitType as keyof typeof acc[typeof year]]++;
-      acc[year].total++;
-      
       return acc;
-    }, {} as Record<number, { year: string; Voluntary: number; Involuntary: number; Unknown: number; total: number }>);
+    }, {} as Record<number, { year: string; Voluntary: number; Involuntary: number; total: number }>);
 
   const chartData = Object.values(exitData).sort((a, b) => parseInt(a.year) - parseInt(b.year));
 
@@ -53,7 +56,6 @@ export default function ExitTrendsChart({ employees }: ExitTrendsChartProps) {
           <Legend />
           <Bar dataKey="Voluntary" stackId="a" fill="#00C49F" name="Voluntary" />
           <Bar dataKey="Involuntary" stackId="a" fill="#FF8042" name="Involuntary" />
-          <Bar dataKey="Unknown" stackId="a" fill="#FFBB28" name="Unknown" />
         </BarChart>
       </ResponsiveContainer>
     </div>

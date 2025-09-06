@@ -1,6 +1,6 @@
 'use client';
 
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Employee {
   'Employee ID': string;
@@ -64,7 +64,11 @@ export default function TenureExitAnalysis({ employees }: TenureExitAnalysisProp
     return acc;
   }, {} as Record<string, { range: string; voluntary: number; involuntary: number; total: number }>);
 
-  const chartData = Object.values(tenureRanges);
+  // Sort tenure ranges in ascending order of time
+  const rangeOrder = ['0-6 months', '6-12 months', '1-2 years', '2-3 years', '3-5 years', '5+ years'];
+  const chartData = rangeOrder
+    .map(range => tenureRanges[range])
+    .filter(data => data && data.total > 0); // Only include ranges that have data
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -118,13 +122,15 @@ export default function TenureExitAnalysis({ employees }: TenureExitAnalysisProp
 
       {/* Chart showing tenure ranges */}
       <ResponsiveContainer width="100%" height={300}>
-        <ScatterChart data={chartData}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="range" />
           <YAxis />
           <Tooltip content={<CustomTooltip />} />
-          <Scatter dataKey="total" fill="#8884d8" />
-        </ScatterChart>
+          <Legend />
+          <Bar dataKey="voluntary" stackId="a" fill="#00C49F" name="Voluntary" />
+          <Bar dataKey="involuntary" stackId="a" fill="#FF8042" name="Involuntary" />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

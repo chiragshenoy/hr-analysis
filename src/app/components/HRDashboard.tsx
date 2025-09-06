@@ -34,7 +34,7 @@ interface DashboardStats {
   totalDepartments: number;
   totalLocations: number;
   avgTenure: number;
-  turnoverRate: number;
+  attritionRate: number;
   newHires: number;
   voluntaryExits: number;
   involuntaryExits: number;
@@ -51,7 +51,7 @@ export default function HRDashboard() {
     totalDepartments: 0,
     totalLocations: 0,
     avgTenure: 0,
-    turnoverRate: 0,
+    attritionRate: 0,
     newHires: 0,
     voluntaryExits: 0,
     involuntaryExits: 0,
@@ -110,19 +110,22 @@ export default function HRDashboard() {
     
     const avgTenure = tenures.length > 0 ? tenures.reduce((a, b) => a + b, 0) / tenures.length : 0;
     
-    // Calculate turnover rate (exits in last 12 months / total employees)
+    // Calculate attrition rate for current year
+    const currentYear = new Date().getFullYear();
+    const currentYearStart = new Date(currentYear, 0, 1);
+    
+    const currentYearExits = data.filter(emp => {
+      if (!emp['Date of Exit']) return false;
+      const exitDate = new Date(emp['Date of Exit']);
+      return exitDate >= currentYearStart;
+    }).length;
+    
+    const attritionRate = totalEmployees > 0 ? (currentYearExits / totalEmployees) * 100 : 0;
+    
+    // Calculate new hires in last 12 months
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
     
-    const yearlyExits = data.filter(emp => {
-      if (!emp['Date of Exit']) return false;
-      const exitDate = new Date(emp['Date of Exit']);
-      return exitDate >= oneYearAgo;
-    }).length;
-    
-    const turnoverRate = totalEmployees > 0 ? (yearlyExits / totalEmployees) * 100 : 0;
-    
-    // Calculate new hires in last 12 months
     const newHires = data.filter(emp => {
       const joinDate = new Date(emp['Date of Joining']);
       return joinDate >= oneYearAgo;
@@ -157,7 +160,7 @@ export default function HRDashboard() {
       totalDepartments: departments,
       totalLocations: locations,
       avgTenure: Math.round(avgTenure * 10) / 10,
-      turnoverRate: Math.round(turnoverRate * 10) / 10,
+      attritionRate: Math.round(attritionRate * 10) / 10,
       newHires,
       voluntaryExits,
       involuntaryExits,
@@ -269,8 +272,8 @@ export default function HRDashboard() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Turnover Rate</p>
-              <p className="text-2xl font-bold text-red-600">{stats.turnoverRate}%</p>
+              <p className="text-sm font-medium text-gray-600">Attrition Rate (2025)</p>
+              <p className="text-2xl font-bold text-red-600">{stats.attritionRate}%</p>
             </div>
             <TrendingDown className="h-8 w-8 text-red-600" />
           </div>
