@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Papa from 'papaparse';
 import { Users, UserCheck, UserX, Building, MapPin, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import DepartmentChart from './DepartmentChart';
 import LocationChart from './LocationChart';
@@ -59,28 +58,31 @@ export default function HRDashboard() {
     recentExits: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch('/data/hr-data.csv');
-        const csvText = await response.text();
+        const response = await fetch('/api/hr-data');
         
-        Papa.parse(csvText, {
-          header: true,
-          complete: (results) => {
-            const data = results.data as Employee[];
-            setEmployees(data);
-            calculateStats(data);
-            setLoading(false);
-          },
-          error: (error) => {
-            console.error('Error parsing CSV:', error);
-            setLoading(false);
-          }
-        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        
+        const data = result.data as Employee[];
+        setEmployees(data);
+        calculateStats(data);
+        setError(null);
+        setLoading(false);
       } catch (error) {
-        console.error('Error loading CSV file:', error);
+        console.error('Error loading HR data:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load HR data');
         setLoading(false);
       }
     };
@@ -166,7 +168,29 @@ export default function HRDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading HR data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded max-w-md">
+            <strong className="font-bold">Error loading HR data:</strong>
+            <span className="block sm:inline"> {error}</span>
+          </div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
