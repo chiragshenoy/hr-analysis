@@ -24,7 +24,7 @@ const COLORS = ['#0088FE', '#FF8042'];
 
 export default function GenderChart({ employees }: GenderChartProps) {
   const genderData = employees.reduce((acc, employee) => {
-    const gender = employee.Gender;
+    const gender = employee.Gender?.trim(); // Trim whitespace
     if (gender) {
       acc[gender] = (acc[gender] || 0) + 1;
     }

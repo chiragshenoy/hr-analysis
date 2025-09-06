@@ -49,16 +49,20 @@ export default function TenureExitAnalysis({ employees }: TenureExitAnalysisProp
     else range = '5+ years';
 
     if (!acc[range]) {
-      acc[range] = { range, voluntary: 0, involuntary: 0, unknown: 0, total: 0 };
+      acc[range] = { range, voluntary: 0, involuntary: 0, total: 0 };
     }
 
-    if (employee.exitType === 'Voluntary') acc[range].voluntary++;
-    else if (employee.exitType === 'Involuntary') acc[range].involuntary++;
-    else acc[range].unknown++;
+    if (employee.exitType === 'Voluntary') {
+      acc[range].voluntary++;
+      acc[range].total++;
+    } else if (employee.exitType === 'Involuntary') {
+      acc[range].involuntary++;
+      acc[range].total++;
+    }
+    // Skip unknown exit types - don't count them in totals
     
-    acc[range].total++;
     return acc;
-  }, {} as Record<string, { range: string; voluntary: number; involuntary: number; unknown: number; total: number }>);
+  }, {} as Record<string, { range: string; voluntary: number; involuntary: number; total: number }>);
 
   const chartData = Object.values(tenureRanges);
 
@@ -70,7 +74,6 @@ export default function TenureExitAnalysis({ employees }: TenureExitAnalysisProp
           <p className="font-semibold">{data.range}</p>
           <p className="text-green-600">Voluntary: {data.voluntary}</p>
           <p className="text-red-600">Involuntary: {data.involuntary}</p>
-          <p className="text-yellow-600">Unknown: {data.unknown}</p>
           <p className="text-gray-600">Total: {data.total}</p>
         </div>
       );

@@ -10,6 +10,7 @@ import ExitTrendsChart from './ExitTrendsChart';
 import ExitTypeChart from './ExitTypeChart';
 import TenureExitAnalysis from './TenureExitAnalysis';
 import MonthlyExitTrends from './MonthlyExitTrends';
+import ManagerFilter from './ManagerFilter';
 import EmployeeTable from './EmployeeTable';
 
 interface Employee {
@@ -355,6 +356,12 @@ export default function HRDashboard() {
         <div className="grid grid-cols-1 gap-6 mb-6">
           <TenureExitAnalysis employees={employees} />
         </div>
+      </div>
+
+      {/* Team Management Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Team Management</h2>
+        <ManagerFilter employees={employees} />
       </div>
 
       {/* Employee Table */}
